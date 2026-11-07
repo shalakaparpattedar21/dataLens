@@ -19,7 +19,10 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_ENCODINGS = ("utf-8", "latin-1", "cp1252")
+# Order matters: latin-1 decodes ANY byte sequence, so it must come last. cp1252 (Windows)
+# maps byte 0x96 to an en dash, whereas latin-1 maps it to a control character, which would
+# silently create a second spelling of the same label.
+DEFAULT_ENCODINGS = ("utf-8", "cp1252", "latin-1")
 
 
 def discover_files(raw_dir: str | Path, pattern: str = "*.csv") -> list[Path]:

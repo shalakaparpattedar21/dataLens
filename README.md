@@ -4,7 +4,7 @@
 
 An experimental framework for dataset intelligence, data quality assessment and predictive modeling, applied to network intrusion detection on CIC-IDS2017.
 
-> **Status: Phase 1 (Foundation) in progress.** The repository skeleton, configuration, environment and a dataset verifier exist. No dataset statistics, models or results exist yet; this README will only report measured results.
+> **Status: Phases 1-2 code written; not yet run on real CIC-IDS2017.** Ingestion, profiling and quality assessment are implemented and unit-tested on synthetic data. No dataset statistics, models or results exist yet; this README will only report measured results. See `PROGRESS.md`.
 
 ## Motivation
 
@@ -37,7 +37,7 @@ flowchart LR
     D --> J
 ```
 
-Implemented so far: configuration loading and the first slice of Ingestion (`datalens.ingestion.verify`). Everything else is planned.
+Implemented so far: configuration, ingestion (`verify`, `loader`), profiling, quality assessment and the quality report writer. Preprocessing onward is planned.
 
 ## Setup
 
@@ -54,8 +54,12 @@ pytest
 CIC-IDS2017 is **not** included. See [`data/README.md`](data/README.md) for download steps and citation/terms notes, then:
 
 ```bash
-python scripts/verify_dataset.py
+python scripts/verify_dataset.py                          # file-level checks
+python scripts/profile_dataset.py                         # profile + quality report (full data)
+python scripts/profile_dataset.py --sample-fraction 0.1   # development sample (recorded in outputs)
 ```
+
+Outputs go to `reports/tables/` (`quality_report.md`, `quality_findings.csv`, `profile_columns.csv`, `profile_summary.json`). Every output records whether it came from the full dataset or a sample.
 
 ## Repository layout
 
