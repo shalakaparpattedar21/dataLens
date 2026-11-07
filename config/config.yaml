@@ -1,0 +1,40 @@
+# DataLens configuration. Every experiment must record the values it used.
+
+project:
+  name: DataLens
+  random_seed: 42
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  reports_dir: reports
+  figures_dir: reports/figures
+  tables_dir: reports/tables
+  experiments_dir: experiments
+  models_dir: models_store
+
+ingestion:
+  # CIC-IDS2017 "MachineLearningCVE" CSVs (one file per capture day).
+  file_glob: "*.csv"
+  encoding: "utf-8"
+  fallback_encodings: ["latin-1", "cp1252"]
+  chunk_size: 200000          # rows per chunk for large-file processing
+  large_file_threshold_mb: 100  # above this, use chunked reading
+  # Development sampling. null = use ALL rows. Any value other than null must be
+  # recorded in every result so a sample is never presented as the full dataset.
+  sample_fraction: null
+  label_column: "Label"
+  strip_column_whitespace: true   # CIC-IDS2017 headers have leading spaces
+
+profiling:
+  near_constant_threshold: 0.99   # top value share above this => near-constant
+  high_cardinality_ratio: 0.5     # unique/rows above this => high-cardinality
+  outlier_iqr_factor: 1.5         # flag only; never auto-remove
+
+split:
+  strategy: stratified            # stratified | by_day (added in a later phase)
+  test_size: 0.2
+  cv_folds: 5
+
+logging:
+  level: INFO

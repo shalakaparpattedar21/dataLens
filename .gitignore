@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+.env
+
+# Data: never commit raw or processed CIC-IDS2017 files (large; redistribution terms apply)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Trained models (large binaries); experiment logs and reports ARE tracked
+models_store/
+*.joblib
+*.pkl
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
