@@ -2,22 +2,54 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
+import shutil
 import sqlite3
 import tempfile
 import time
 import uuid
+from collections import Counter
 from pathlib import Path
 from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
-from sklearn.feature_selection import SelectKBest, VarianceThreshold, f_classif
 
 from datalens.app_service import CHUNK_ROWS, DatasetStore, _encoding_for, utc_now
 from datalens.preprocessing.fitting import fit_preprocessor
 from datalens.preprocessing.pipeline import build_preprocessor, split_columns
 from datalens.features.selection import build_selector
+
+
+MIN_TEST_PER_CLASS = 5          # below this many test rows, per-class metrics are flagged unreliable
+MANY_CLASSES = 50               # a target with more distinct values than this may be continuous
+MAX_LISTED_WARNINGS = 25
+
+
+def class_coverage(class_counts: dict[str, Counter]) -> tuple[list[dict[str, Any]], list[str]]:
+    """Per-class train/test counts with flags, and human-readable warnings.
+
+    The split is random per class and chunk, so a rare class can end up entirely in one partition.
+    That is reported, never hidden: a class absent from training cannot be learned, and a class
+    absent from (or tiny in) the test set cannot be evaluated.
+    """
+    train, test = class_counts["train"], class_counts["test"]
+    labels = sorted(set(train) | set(test), key=lambda k: (-(train.get(k, 0) + test.get(k, 0)), str(k)))
+    rows: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    for label in labels:
+        tr, te = int(train.get(label, 0)), int(test.get(label, 0))
+        flags = []
+        if tr == 0:
+            flags.append("absent_from_train")
+            warnings.append(f"Class '{label}' ({te:,} rows) is absent from the training set, so a model cannot learn it.")
+        if te == 0:
+            flags.append("absent_from_test")
+            warnings.append(f"Class '{label}' ({tr:,} rows) is absent from the test set, so its performance cannot be measured.")
+        elif te < MIN_TEST_PER_CLASS:
+            flags.append("low_test_support")
+            warnings.append(f"Class '{label}' has only {te:,} test row(s): its per-class metrics are unreliable.")
+        rows.append({"label": str(label), "train": tr, "test": te, "total": tr + te, "flags": flags})
+    return rows, warnings
 
 
 def _stable_seed(seed: int, file_index: int, chunk_index: int, label: str) -> int:
@@ -108,7 +140,24 @@ def prepare_streaming(
     record: dict[str, Any], options: dict[str, Any], store: DatasetStore,
     progress: Callable[[float, str], None] | None = None,
 ) -> dict[str, Any]:
-    """Prepare CSVs using bounded chunks; original files are read-only and never rewritten."""
+    """Prepare CSVs using bounded chunks; original files are read-only and never rewritten.
+
+    A run that fails part-way leaves no partial output folder behind.
+    """
+    run_id = f"{datetime_token()}-{uuid.uuid4().hex[:6]}"
+    output = store.prepared / record["id"] / run_id
+    output.mkdir(parents=True, exist_ok=False)
+    try:
+        return _prepare_into(record, options, store, progress, run_id, output)
+    except BaseException:
+        shutil.rmtree(output, ignore_errors=True)
+        raise
+
+
+def _prepare_into(
+    record: dict[str, Any], options: dict[str, Any], store: DatasetStore,
+    progress: Callable[[float, str], None] | None, run_id: str, output: Path,
+) -> dict[str, Any]:
     files = [Path(p) for p in record["files"]]
     if not files or any(not p.is_file() for p in files):
         raise FileNotFoundError("One or more dataset files are unavailable")
@@ -127,9 +176,6 @@ def prepare_streaming(
     if policy not in ("keep", "drop_exact", "drop_within_file"):
         raise ValueError("Unknown duplicate policy")
 
-    run_id = f"{datetime_token()}-{uuid.uuid4().hex[:6]}"
-    output = store.prepared / record["id"] / run_id
-    output.mkdir(parents=True, exist_ok=False)
     total_expected = int((record.get("profile") or {}).get("rows", 0) * fraction)
     fit_rate = min(1.0, fit_limit / max(1, total_expected * (1 - test_size)))
     fit_parts: list[pd.DataFrame] = []
@@ -151,7 +197,6 @@ def prepare_streaming(
                     rows[target] = rows[target].fillna("(missing)")
                 retained, dropped = tracker.filter(rows, target, source)
                 dup_removed_fit += dropped
-                keep_train = ~test_mask
                 # align positions after dedup using retained original indices
                 train_mask = np.asarray([not bool(test_mask[chunk.index.get_loc(i)]) for i in retained.index], dtype=bool)
                 train = retained.loc[train_mask]
@@ -200,12 +245,16 @@ def prepare_streaming(
     out_names = [str(s) for s in pre.get_feature_names_out()]
     if selector is not None:
         out_names = list(np.asarray(out_names, dtype=object)[selector.get_support()])
+    if len(set(out_names)) != len(out_names) or (target and target in set(out_names)):
+        raise ValueError("Transformed feature names are not unique or collide with the target column name; rename a column in the source CSV")
 
     train_path, test_path = output / "train.csv", output / "test.csv"
     written = {"train": 0, "test": 0}
     sample_rows = dropped_rows = 0
     sample_missing_cells = sample_inf_cells = 0
     class_counts = {"train": Counter(), "test": Counter()}
+    # 64-bit row hashes (8 bytes per row, about 23 MB for 2.8M rows) measure train/test overlap.
+    row_hashes: dict[str, list[np.ndarray]] = {"train": [], "test": []}
     with tempfile.TemporaryDirectory(prefix="datalens-prepare-output-") as tmp:
         tracker = _DuplicateTracker(Path(tmp) / "seen.sqlite", policy)
         try:
@@ -224,6 +273,7 @@ def prepare_streaming(
                     part = kept.loc[mask]
                     if part.empty:
                         continue
+                    row_hashes[split_name].append(pd.util.hash_pandas_object(part, index=False).to_numpy())
                     X = part[feature_cols]
                     transformed = np.asarray(pre.transform(X))
                     if selector is not None:
@@ -243,6 +293,27 @@ def prepare_streaming(
         raise RuntimeError("Prepared feature data failed NaN/infinity validation")
     duplicate_report = {"policy": policy, "sample_rows_before": sample_rows, "rows_removed": dropped_rows,
                         "rows_after": written["train"] + written["test"]}
+    train_hashes =np.concatenate(row_hashes["train"]) if row_hashes["train"] else np.empty(0, dtype=np.uint64)
+    test_hashes = np.concatenate(row_hashes["test"]) if row_hashes["test"] else np.empty(0, dtype=np.uint64)
+    overlap_rows = int(np.isin(test_hashes, train_hashes).sum()) if train_hashes.size and test_hashes.size else 0
+    overlap = {"test_rows": int(test_hashes.size), "test_rows_also_in_train": overlap_rows,
+               "percent_of_test": round(100 * overlap_rows / max(1, test_hashes.size), 4),
+               "basis": "identical feature values and target in the source rows, before transformation"}
+    coverage, coverage_warnings = class_coverage(class_counts) if target else ([], [])
+    run_warnings: list[str] = []
+    if fraction < 1:
+        run_warnings.append("A sampled run is for workflow validation and is not a full-dataset result.")
+    if overlap_rows:
+        run_warnings.append(f"{overlap_rows:,} test rows ({overlap['percent_of_test']}%) are exact copies of training rows, so test scores "
+                            "will look better than they are. Choose a duplicate policy other than 'keep' to remove them.")
+    run_warnings.extend(coverage_warnings)
+    if target:
+        n_missing_target = class_counts["train"].get("(missing)", 0) + class_counts["test"].get("(missing)", 0)
+        if n_missing_target:
+            run_warnings.append(f"{n_missing_target:,} rows have no target value and were kept as the class '(missing)'. Fix or remove them before modeling.")
+        if len(coverage) > MANY_CLASSES:
+            run_warnings.append(f"The target has {len(coverage):,} distinct values and is treated as classes. If it is a continuous quantity, classification metrics and stratification do not apply.")
+    min_freq = prep_cfg["categorical"]["min_frequency"] if prep_cfg["categorical"]["encoding"] == "onehot" and categorical else None
     config_record = {
         "dataset_id": record["id"], "dataset_name": record["name"], "sample_fraction": fraction,
         "is_full_dataset": fraction == 1, "seed": seed, "test_size": test_size,
@@ -252,6 +323,10 @@ def prepare_streaming(
         "selection_k": options.get("selection_k", 30), "fit_record": fit_record,
         "split_method": "seeded per-class random assignment within chunks (approximately stratified)",
         "class_counts": {split: dict(counts) for split, counts in class_counts.items()},
+        "class_coverage": coverage, "train_test_overlap": overlap,
+        "categorical_min_frequency": min_freq,
+        "categorical_note": (f"One-hot encoding groups categories rarer than {min_freq:.0%} of training rows into an 'infrequent' column."
+                             if min_freq else None),
         "chunk_rows": CHUNK_ROWS, "created_at": utc_now(),
     }
     profile = record.get("profile") or {}
@@ -273,10 +348,13 @@ def prepare_streaming(
         "summary": "Prepared outputs preserve all selected rows except duplicates removed under the explicitly chosen policy. Features were fitted on training data only.",
         "source_issues": profile.get("issues", []), "before_after": before_after,
         "validation": validation, "duplicate_policy": duplicate_report,
-        "warnings": ["A sampled run is for workflow validation and is not a full-dataset result."] if fraction < 1 else [],
+        "train_test_overlap": overlap, "class_coverage": coverage,
+        "warnings": run_warnings,
     }
     issue_lines = [f"- **{item['title']}**{(' · ' + item['column']) if item.get('column') else ''}: {item['explanation']}"
+                   + (f" *Recommendation:* {item['recommendation']}" if item.get("recommendation") else "")
                    for item in quality_report["source_issues"]]
+    coverage_lines = [f"| {row['label']} | {row['train']:,} | {row['test']:,} | {', '.join(row['flags']) or 'ok'} |" for row in coverage]
     report_md = [
         "# DataLens preparation quality report", "",
         f"- Dataset: **{record['name']}**",
@@ -293,6 +371,12 @@ def prepare_streaming(
         f"- Transformed feature columns: {len(out_names)}",
         f"- Missing feature cells after preparation: {validation['train']['nan_feature_cells'] + validation['test']['nan_feature_cells']:,}",
         f"- Infinite feature cells after preparation: {validation['train']['infinite_feature_cells'] + validation['test']['infinite_feature_cells']:,}",
+        f"- Test rows that are exact copies of training rows: {overlap_rows:,} ({overlap['percent_of_test']}% of test)",
+        "", "## Warnings", "",
+        *([f"- {w}" for w in run_warnings[:MAX_LISTED_WARNINGS]] or ["- None."]),
+        *([f"- ...and {len(run_warnings) - MAX_LISTED_WARNINGS} more (see quality_report.json)."] if len(run_warnings) > MAX_LISTED_WARNINGS else []),
+        *(["", "## Class coverage", "", "| Class | Train rows | Test rows | Status |", "|---|---:|---:|---|", *coverage_lines] if coverage else []),
+        *(["", f"Note: {config_record['categorical_note']}"] if config_record["categorical_note"] else []),
         "", "Outliers are flagged during profiling and are never removed automatically.",
     ]
     (output / "config.json").write_text(json.dumps(config_record, indent=2), encoding="utf-8")
@@ -302,7 +386,11 @@ def prepare_streaming(
     manifest = {"id": run_id, "dataset_id": record["id"], "dataset_name": record["name"],
                 "created_at": utc_now(), "output_dir": str(output), "files": ["train.csv", "test.csv", "config.json", "quality_report.json", "quality_report.md", "comparison.json"],
                 "rows": written, "sample_fraction": fraction, "comparison": before_after,
-                "validation": validation, "duplicate_report": duplicate_report}
+                "validation": validation, "duplicate_report": duplicate_report,
+                "target_column": target, "warnings": run_warnings, "class_coverage": coverage,
+                "train_test_overlap": overlap, "config": {k: config_record[k] for k in (
+                    "test_size", "seed", "duplicate_policy", "numeric_imputer", "missing_indicator", "encoding",
+                    "scaler", "feature_selection", "selection_k")}}
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     if progress:
         progress(1.0, "Preparation and validation complete")

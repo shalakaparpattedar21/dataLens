@@ -1,27 +1,28 @@
 from __future__ import annotations
 
 import json
-import tempfile
+import logging
 import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Literal
-from urllib.parse import quote
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from datalens.app_service import DEFAULT_RAW_DIR, DATASETS_DIR, DatasetStore, profile_files, utc_now
+from datalens.app_service import DEFAULT_RAW_DIR, DatasetStore, profile_files, utc_now, validate_csv_upload
 from datalens.ingestion.verify import discover_files
 from datalens.prepare_service import prepare_streaming
 
-app = FastAPI(title="DataLens API", version="0.2.0", description="Local dataset profiling and preparation service")
+logger = logging.getLogger("datalens.api")
+
+app = FastAPI(title="DataLens API", version="0.3.0", description="Local dataset profiling and preparation service")
 app.add_middleware(
     CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["*"]
+    allow_credentials=False, allow_methods=["GET", "POST", "DELETE"], allow_headers=["*"]
 )
 store = DatasetStore()
 executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="datalens-job")
@@ -67,8 +68,12 @@ def _start_job(dataset_id: str, kind: str, work):
             with _jobs_lock:
                 _jobs[job_id].update(status="complete", progress=1.0, message="Complete", result=result)
         except Exception as exc:
+            # Full traceback goes to the server log; the UI gets a readable message.
+            logger.exception("Job %s (%s) failed", job_id, kind)
+            known = isinstance(exc, (ValueError, FileNotFoundError, RuntimeError))
+            message = str(exc) if known and str(exc) else f"Unexpected {type(exc).__name__}: {exc}"
             with _jobs_lock:
-                _jobs[job_id].update(status="failed", progress=1.0, message="Job failed", error=str(exc))
+                _jobs[job_id].update(status="failed", progress=1.0, message="Job failed", error=message)
 
     executor.submit(run)
     return job
@@ -102,6 +107,10 @@ async def upload_dataset(request: Request, filename: str):
                 output.write(block)
         if written == 0:
             raise HTTPException(400, "The uploaded file is empty")
+        try:
+            validate_csv_upload(temp)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
         record = store.create_upload(safe, temp, written)
         return {"dataset": record}
     except Exception:
@@ -110,17 +119,47 @@ async def upload_dataset(request: Request, filename: str):
 
 
 @app.post("/api/datasets/import-cicids", status_code=201)
-def import_local_cicids():
+def import_local_cicids(response: Response):
+    """Register the CSV files in data/raw. Idempotent: importing the same files again returns the existing dataset."""
     try:
         files = discover_files(DEFAULT_RAW_DIR, "*.csv")
     except FileNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
+    existing = store.find_local(files)
+    if existing is not None:
+        response.status_code = 200
+        return {"dataset": existing, "already_registered": True}
     record = store.register_local(files, "CIC-IDS2017 · local files")
-    return {"dataset": record}
+    return {"dataset": record, "already_registered": False}
+
+
+def _active_job_for(dataset_id: str) -> bool:
+    with _jobs_lock:
+        return any(j["dataset_id"] == dataset_id and j["status"] in ("queued", "running") for j in _jobs.values())
+
+
+@app.delete("/api/datasets/{dataset_id}")
+def delete_dataset(dataset_id: str):
+    """Remove a dataset from the workspace. Source CSV files of local datasets are never deleted."""
+    record = store.get(dataset_id)
+    if record is None:
+        raise HTTPException(404, "Dataset not found")
+    if _active_job_for(dataset_id):
+        raise HTTPException(409, "A job is still running for this dataset")
+    store.delete_dataset(dataset_id)
+    return {"deleted": dataset_id, "kind": record.get("kind")}
+
+
+@app.delete("/api/preparations/{run_id}")
+def delete_preparation(run_id: str):
+    if not store.delete_preparation(run_id):
+        raise HTTPException(404, "Preparation not found")
+    return {"deleted": run_id}
 
 
 @app.post("/api/datasets/{dataset_id}/profile", status_code=202)
-def profile_dataset(dataset_id: str, body: ProfileRequest):
+def profile_dataset(dataset_id: str, body: ProfileRequest | None = None):
+    body = body or ProfileRequest()
     record = store.get(dataset_id)
     if record is None:
         raise HTTPException(404, "Dataset not found")

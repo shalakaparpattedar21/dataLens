@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import codecs
-import hashlib
 import json
 import os
+import re
+import shutil
 import sqlite3
 import tempfile
-import time
 import uuid
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
@@ -23,6 +23,14 @@ DATASETS_DIR = WORKSPACE / "datasets"
 PREPARED_DIR = WORKSPACE / "prepared"
 CHUNK_ROWS = 50_000
 PROFILE_SAMPLE_ROWS = 30_000
+RARE_CLASS_ROWS = 100
+IDENTIFIER_TOKENS = {"id", "ip", "port", "timestamp", "time", "date", "mac", "uuid"}
+
+
+def _name_tokens(name: str) -> set[str]:
+    """Lower-case word tokens of a column name ('Destination Port' -> {'destination', 'port'})."""
+    spaced = re.sub(r"([a-z])([A-Z])", r"\1 \2", str(name))
+    return {t for t in re.split(r"[^A-Za-z0-9]+", spaced.lower()) if t}
 
 
 def utc_now() -> str:
@@ -81,7 +89,10 @@ class DatasetStore:
         return record
 
     def get(self, dataset_id: str) -> dict[str, Any] | None:
-        path = self._manifest_path(dataset_id)
+        try:
+            path = self._manifest_path(dataset_id)
+        except ValueError:  # malformed id: treat as "not found" instead of failing the request
+            return None
         if not path.is_file():
             return None
         record = json.loads(path.read_text(encoding="utf-8"))
@@ -94,6 +105,39 @@ class DatasetStore:
     def save(self, record: dict[str, Any]) -> None:
         self._write(self._manifest_path(record["id"]), record)
 
+    def find_local(self, files: list[Path]) -> dict[str, Any] | None:
+        """Return an already-registered local dataset with exactly this set of source files."""
+        wanted = sorted(str(p.resolve()) for p in files)
+        for rec in self.list():
+            if rec.get("kind") == "local_read_only" and sorted(rec.get("files", [])) == wanted:
+                return rec
+        return None
+
+    def delete_dataset(self, dataset_id: str) -> bool:
+        """Remove a dataset registration and its prepared outputs.
+
+        Uploaded datasets own a copy of the CSV inside the workspace, and that copy is removed.
+        Local (read-only) datasets only own a small manifest: the source CSV files they point to
+        are NEVER touched.
+        """
+        if self.get(dataset_id) is None:
+            return False
+        for base in (self.datasets / dataset_id, self.prepared / dataset_id):
+            if base.is_dir() and base.resolve().parent in (self.datasets.resolve(), self.prepared.resolve()):
+                shutil.rmtree(base)
+        return True
+
+    def delete_preparation(self, run_id: str) -> bool:
+        """Remove one prepared run (train/test/config/reports). Source datasets are untouched."""
+        if not run_id or any(c not in "0123456789abcdefghijklmnopqrstuvwxyz-" for c in run_id.lower()):
+            return False
+        removed = False
+        for folder in self.prepared.glob(f"*/{run_id}"):
+            if folder.is_dir() and folder.resolve().parent.parent == self.prepared.resolve():
+                shutil.rmtree(folder)
+                removed = True
+        return removed
+
     def list(self) -> list[dict[str, Any]]:
         records = []
         for path in self.datasets.glob("*/dataset.json"):
@@ -104,6 +148,35 @@ class DatasetStore:
             except (OSError, ValueError, KeyError):
                 continue
         return sorted(records, key=lambda r: r.get("created_at", ""), reverse=True)
+
+
+def validate_csv_upload(path: Path) -> None:
+    """Cheap sanity check of an uploaded file (reads at most the first MiB). Raises ValueError.
+
+    Rejects binary content, unparsable text and files with a header but no data rows, so a bad
+    upload fails immediately with a clear message instead of failing later inside a job.
+    """
+    with path.open("rb") as stream:
+        head = stream.read(1 << 20)
+    if b"\x00" in head:
+        raise ValueError("This does not look like a text CSV file (it contains binary data)")
+    last_error: Exception | None = None
+    for encoding in ("utf-8-sig", "cp1252", "latin-1"):
+        try:
+            sample = pd.read_csv(path, nrows=50, encoding=encoding)
+            break
+        except UnicodeDecodeError as exc:
+            last_error = exc
+        except pd.errors.EmptyDataError as exc:
+            raise ValueError("The CSV has no header row") from exc
+        except (pd.errors.ParserError, ValueError) as exc:
+            raise ValueError(f"The CSV could not be parsed: {exc}") from exc
+    else:  # pragma: no cover - latin-1 decodes every byte sequence
+        raise ValueError(f"The CSV could not be decoded: {last_error}")
+    if sample.shape[1] == 0:
+        raise ValueError("The CSV has no columns")
+    if sample.empty:
+        raise ValueError("The CSV has a header but no data rows")
 
 
 def _encoding_for(path: Path) -> str:
@@ -144,16 +217,16 @@ def _duplicate_summary(conn: sqlite3.Connection, rows: int, n_files: int) -> dic
         conn.execute("CREATE TEMP TABLE spanning(h TEXT PRIMARY KEY)")
         conn.executemany("INSERT INTO spanning VALUES (?)", [(h,) for h in span_hashes])
         span_rows = conn.execute("SELECT COALESCE(SUM(w.n),0) FROM within_counts w JOIN spanning s USING(h)").fetchone()[0]
-        conflict_groups, conflict_rows = conn.execute(
-            "SELECT COUNT(*), COALESCE(SUM(x.total),0) FROM ("
-            "SELECT e.h, SUM(e.n) AS total FROM exact_counts e JOIN spanning s USING(h) "
-            "GROUP BY e.h HAVING COUNT(*)>1) x"
-        ).fetchone()
+        conflict_groups = conn.execute(
+            "SELECT COUNT(*) FROM ("
+            "SELECT e.h FROM exact_counts e JOIN spanning s USING(h) "
+            "GROUP BY e.h HAVING COUNT(*)>1)"
+        ).fetchone()[0]
         per_file = dict(conn.execute(
             "SELECT w.source, COUNT(DISTINCT w.h) FROM within_counts w JOIN spanning s USING(h) GROUP BY w.source"
         ).fetchall())
     else:
-        span_rows = conflict_groups = conflict_rows = 0
+        span_rows = conflict_groups = 0
         per_file = {}
     all_conflict = conn.execute(
         "SELECT COUNT(*), COALESCE(SUM(total),0) FROM ("
@@ -204,6 +277,8 @@ def profile_files(
                 chunk.columns = [str(c).strip() for c in chunk.columns]
                 if schema is None:
                     schema = list(chunk.columns)
+                    if label_column is not None and label_column not in schema:
+                        raise ValueError(f"Label column '{label_column}' was not found in {path.name}")
                     if label_column is None:
                         label_column = next((c for c in schema if c.lower() in {"label", "target", "class", "y"}), None)
                 elif list(chunk.columns) != schema:
@@ -226,7 +301,6 @@ def profile_files(
                     missing[col] += int(value)
                 numeric = chunk.select_dtypes(include=[np.number])
                 if not numeric.empty:
-                    arr = numeric.to_numpy(dtype=np.float64, copy=False)
                     pos_inf.update({c: int(np.isposinf(numeric[c].to_numpy()).sum()) for c in numeric.columns})
                     neg_inf.update({c: int(np.isneginf(numeric[c].to_numpy()).sum()) for c in numeric.columns})
                 if label_column and label_column in chunk.columns:
@@ -275,30 +349,66 @@ def profile_files(
                   "missing_cells": int(missing.get(c, 0)), "positive_infinity_cells": int(pos_inf.get(c, 0)),
                   "negative_infinity_cells": int(neg_inf.get(c, 0))} for c in schema]
     top_missing = sorted(missing.items(), key=lambda item: item[1], reverse=True)
-    total_cells = max(1, rows * len(schema))
     issues = []
     for col, n in top_missing:
+        pct = 100 * n / max(1, rows)
         issues.append({"severity": "warning", "title": "Missing values", "column": col, "count": int(n),
-                       "explanation": f"{n:,} cells are empty. Impute them or review the column before modeling."})
+                       "explanation": f"{n:,} cells ({pct:.2f}% of rows) are empty.",
+                       "recommendation": "Pick an imputation method on the Prepare page (median is robust to outliers). "
+                                         "It is fitted on training rows only."})
     for col, n in (pos_inf + neg_inf).most_common():
         issues.append({"severity": "warning", "title": "Infinite values", "column": col, "count": int(n),
-                       "explanation": "Infinite values cannot be used by many estimators; convert to missing and impute or investigate the source calculation."})
+                       "explanation": "Infinite values break many estimators. They usually come from dividing by zero when "
+                                      "the feature was computed (for example a rate over a zero duration).",
+                       "recommendation": "DataLens converts them to missing and imputes them using training rows only. "
+                                         "Also check how the source calculated this column."})
     if duplicates["exact_duplicate_rows_global"]:
         issues.append({"severity": "warning", "title": "Duplicate rows", "count": duplicates["exact_duplicate_rows_global"],
-                       "explanation": "Exact repeated feature-and-label rows can make random-split metrics optimistic. Review before choosing a duplicate policy."})
+                       "explanation": "Rows repeating an earlier row exactly (features and label). If copies land in both "
+                                      "train and test, test scores look better than they are.",
+                       "recommendation": "Choose 'Remove global exact repeats' (or within-file) on the Prepare page. "
+                                         "'Keep all' leaves them in and reports how many test rows also appear in train."})
+    if duplicates["label_conflict_rows"]:
+        issues.append({"severity": "warning", "title": "Conflicting labels", "count": duplicates["label_conflict_rows"],
+                       "explanation": f"{duplicates['label_conflict_groups']:,} identical feature vectors carry more than one "
+                                      f"label ({duplicates['label_conflict_rows']:,} rows). No model can separate them, so they "
+                                      "set a floor on achievable error and may be label noise.",
+                       "recommendation": "Inspect these rows at the source. DataLens keeps them: no duplicate policy removes them."})
     constants = [c for c, value in constant.items() if value]
     if constants:
         issues.append({"severity": "info", "title": "Constant columns", "count": len(constants), "columns": constants,
-                       "explanation": "These columns have one observed value and add no distinction between records."})
+                       "explanation": "These columns have a single observed value and cannot distinguish records.",
+                       "recommendation": "Choose 'Remove zero variance' under feature selection to drop them from the output."})
     if outliers:
         issues.append({"severity": "info", "title": "Potential outliers", "count": sum(o["sample_outlier_rows"] for o in outliers),
-                       "explanation": "IQR flags unusual numeric values in a deterministic sample. Outliers are flagged for review, not removed."})
+                       "explanation": "IQR flags unusual numeric values in a deterministic sample. Extreme values can be "
+                                      "legitimate (bursts, attacks), so they are flagged, never removed.",
+                       "recommendation": "Prefer robust scaling, or tree-based models that tolerate extremes."})
+    identifier_like = [c for c in schema if c != label_column and _name_tokens(c) & IDENTIFIER_TOKENS]
+    if identifier_like:
+        issues.append({"severity": "info", "title": "Identifier-like columns", "count": len(identifier_like), "columns": identifier_like,
+                       "explanation": "Names suggest identifiers, addresses, ports or timestamps. Such columns can reflect how "
+                                      "the data was collected rather than real behaviour, and may act as shortcuts for a model.",
+                       "recommendation": "Compare model results with and without them before relying on a score. "
+                                         "DataLens does not remove them automatically."})
     if label_column and label_counts:
         class_total = sum(label_counts.values())
         majority = max(label_counts.values())
         if class_total and majority / class_total > 0.8:
             issues.append({"severity": "warning", "title": "Imbalanced target", "count": len(label_counts),
-                           "explanation": f"{max(label_counts, key=label_counts.get)} represents {majority / class_total:.1%} of rows; accuracy alone may be misleading."})
+                           "explanation": f"'{max(label_counts, key=label_counts.get)}' is {majority / class_total:.1%} of rows, so accuracy alone is misleading.",
+                           "recommendation": "Judge models by per-class recall and macro-F1. Check the class coverage warnings after preparation."})
+        rare = sorted(((k, int(v)) for k, v in label_counts.items() if v < RARE_CLASS_ROWS and k != "(missing)"), key=lambda kv: kv[1])
+        if rare:
+            issues.append({"severity": "warning", "title": "Rare classes", "count": len(rare),
+                           "classes": [{"label": k, "count": v} for k, v in rare[:25]],
+                           "explanation": f"{len(rare)} class(es) have fewer than {RARE_CLASS_ROWS} rows. They may be absent from the "
+                                          "train or test split, and their metrics will be unreliable.",
+                           "recommendation": "Report such classes separately with their support instead of averaging them away."})
+    elif not label_column:
+        issues.append({"severity": "info", "title": "No target column detected", "count": 0,
+                       "explanation": "No column named label, target, class or y was found.",
+                       "recommendation": "Choose the target column yourself on the Prepare page, or prepare without a target."})
     return {
         "rows": rows, "columns": len(schema), "column_names": schema, "label_column": label_column,
         "dtypes": type_rows, "missing_cells": int(sum(missing.values())),
