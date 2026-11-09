@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "raw_dir": "D:\\DATALENS\\DataLens_phase1\\data\\raw",
+    "n_files": 8,
+    "files": [
+      {
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+        "rows_in_file": 225745,
+        "rows_loaded": 22574,
+        "encoding": "utf-8"
+      },
+      {
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+        "rows_in_file": 286467,
+        "rows_loaded": 28647,
+        "encoding": "utf-8"
+      },
+      {
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+        "rows_in_file": 191033,
+        "rows_loaded": 19103,
+        "encoding": "utf-8"
+      },
+      {
+        "file": "Monday-WorkingHours.pcap_ISCX.csv",
+        "rows_in_file": 529918,
+        "rows_loaded": 52992,
+        "encoding": "utf-8"
+      },
+      {
+        "file": "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+        "rows_in_file": 288602,
+        "rows_loaded": 28860,
+        "encoding": "utf-8"
+      },
+      {
+        "file": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "rows_in_file": 170366,
+        "rows_loaded": 17037,
+        "encoding": "utf-8"
+      },
+      {
+        "file": "Tuesday-WorkingHours.pcap_ISCX.csv",
+        "rows_in_file": 445909,
+        "rows_loaded": 44591,
+        "encoding": "utf-8"
+      },
+      {
+        "file": "Wednesday-workingHours.pcap_ISCX.csv",
+        "rows_in_file": 692703,
+        "rows_loaded": 69270,
+        "encoding": "utf-8"
+      }
+    ],
+    "rows_in_files": 2830743,
+    "rows_loaded": 283074,
+    "n_columns": 80,
+    "label_column": "Label",
+    "source_column": "source_file",
+    "sample_fraction": 0.1,
+    "is_full_dataset": false,
+    "random_seed": 42,
+    "fingerprint": "5c9706c5e8a18df7",
+    "fingerprint_includes_content_hash": true,
+    "load_seconds": 37.78,
+    "profile_seconds": 3.88
+  },
+  "profile": {
+    "shape": {
+      "rows": 283074,
+      "columns_total": 80,
+      "feature_columns": 78
+    },
+    "memory_mb": 185.73,
+    "duplicates": {
+      "n_rows": 283074,
+      "duplicate_rows_full": 13894,
+      "duplicate_rows_features": 13915,
+      "label_conflict_groups": 21,
+      "label_conflict_rows": 71
+    },
+    "target": {
+      "n_classes": 14,
+      "counts": {
+        "BENIGN": 227295,
+        "DoS Hulk": 23096,
+        "PortScan": 15894,
+        "DDoS": 12827,
+        "DoS GoldenEye": 1020,
+        "FTP-Patator": 811,
+        "SSH-Patator": 604,
+        "DoS Slowhttptest": 566,
+        "DoS slowloris": 541,
+        "Bot": 181,
+        "Web Attack \ufffd Brute Force": 166,
+        "Web Attack \ufffd XSS": 66,
+        "Infiltration": 4,
+        "Web Attack \ufffd Sql Injection": 3
+      },
+      "percent": {
+        "BENIGN": 80.2953,
+        "DoS Hulk": 8.159,
+        "PortScan": 5.6148,
+        "DDoS": 4.5313,
+        "DoS GoldenEye": 0.3603,
+        "FTP-Patator": 0.2865,
+        "SSH-Patator": 0.2134,
+        "DoS Slowhttptest": 0.1999,
+        "DoS slowloris": 0.1911,
+        "Bot": 0.0639,
+        "Web Attack \ufffd Brute Force": 0.0586,
+        "Web Attack \ufffd XSS": 0.0233,
+        "Infiltration": 0.0014,
+        "Web Attack \ufffd Sql Injection": 0.0011
+      },
+      "majority_class": "BENIGN",
+      "minority_class": "Web Attack \ufffd Sql Injection",
+      "imbalance_ratio": 75765.0,
+      "by_source": {
+        "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv": {
+          "BENIGN": 9747,
+          "DDoS": 12827
+        },
+        "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv": {
+          "BENIGN": 12753,
+          "PortScan": 15894
+        },
+        "Friday-WorkingHours-Morning.pcap_ISCX.csv": {
+          "BENIGN": 18922,
+          "Bot": 181
+        },
+        "Monday-WorkingHours.pcap_ISCX.csv": {
+          "BENIGN": 52992
+        },
+        "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv": {
+          "BENIGN": 28856,
+          "Infiltration": 4
+        },
+        "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv": {
+          "BENIGN": 16802,
+          "Web Attack \ufffd Brute Force": 166,
+          "Web Attack \ufffd Sql Injection": 3,
+          "Web Attack \ufffd XSS": 66
+        },
+        "Tuesday-WorkingHours.pcap_ISCX.csv": {
+          "BENIGN": 43176,
+          "FTP-Patator": 811,
+          "SSH-Patator": 604
+        },
+        "Wednesday-workingHours.pcap_ISCX.csv": {
+          "BENIGN": 44047,
+          "DoS GoldenEye": 1020,
+          "DoS Hulk": 23096,
+          "DoS Slowhttptest": 566,
+          "DoS slowloris": 541
+        }
+      }
+    }
+  }
+}

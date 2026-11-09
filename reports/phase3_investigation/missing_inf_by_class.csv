@@ -1,0 +1,16 @@
+class,rows,rows_with_inf,rows_with_nan,pct_rows_with_inf,pct_rows_with_nan
+BENIGN,2273097.0,1777.0,409.0,0.0782,0.018
+DoS Hulk,231073.0,949.0,949.0,0.4107,0.4107
+PortScan,158930.0,126.0,0.0,0.0793,0.0
+DDoS,128027.0,2.0,0.0,0.0016,0.0
+DoS GoldenEye,10293.0,0.0,0.0,0.0,0.0
+FTP-Patator,7938.0,3.0,0.0,0.0378,0.0
+SSH-Patator,5897.0,0.0,0.0,0.0,0.0
+DoS slowloris,5796.0,0.0,0.0,0.0,0.0
+DoS Slowhttptest,5499.0,0.0,0.0,0.0,0.0
+Bot,1966.0,10.0,0.0,0.5086,0.0
+Web Attack Brute Force,1507.0,0.0,0.0,0.0,0.0
+Web Attack XSS,652.0,0.0,0.0,0.0,0.0
+Infiltration,36.0,0.0,0.0,0.0,0.0
+Web Attack Sql Injection,21.0,0.0,0.0,0.0,0.0
+Heartbleed,11.0,0.0,0.0,0.0,0.0

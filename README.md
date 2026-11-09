@@ -4,7 +4,7 @@
 
 An experimental framework for dataset intelligence, data quality assessment and predictive modeling, applied to network intrusion detection on CIC-IDS2017.
 
-> **Status: Phases 1-2 code written; not yet run on real CIC-IDS2017.** Ingestion, profiling and quality assessment are implemented and unit-tested on synthetic data. No dataset statistics, models or results exist yet; this README will only report measured results. See `PROGRESS.md`.
+> **Status: Phases 1-3 implementation integrated; Phase 3 has not yet been locally tested or run on CIC-IDS2017.** Phase 1/2 reports are present locally. Phase 3 adds dataset investigation, leakage-aware preparation, and train-only preprocessing and analysis. No Phase 3 results are claimed here; see `PROGRESS.md`.
 
 ## Motivation
 
@@ -37,7 +37,7 @@ flowchart LR
     D --> J
 ```
 
-Implemented so far: configuration, ingestion (`verify`, `loader`), profiling, quality assessment and the quality report writer. Preprocessing onward is planned.
+Implemented so far: configuration, ingestion (`verify`, `loader`), profiling, quality assessment, dataset investigation, train/test splitting, preprocessing, feature analysis, imbalance reporting, preparation summaries, and run metadata. Model training remains unimplemented.
 
 ## Setup
 
@@ -68,3 +68,13 @@ See `src/datalens/` for modules, `config/config.yaml` for settings, `PROGRESS.md
 ## Limitations
 
 Offline benchmark results will not demonstrate real-world production intrusion detection. Evaluation-validity limits will be documented as they are investigated.
+## Phase 3 preparation
+
+The Phase 3 scripts are available after installing the project dependencies:
+
+```bash
+python scripts/investigate_dataset.py                         # full dataset, streaming investigation
+python scripts/prepare_dataset.py --sample-fraction 0.1      # explicitly sampled preparation run
+```
+
+Preparation reports are written below `reports/tables/phase3/`; investigation reports are written below `reports/tables/`. Sampling is explicit and recorded. The full-data preparation default can require substantial memory. Review `PROGRESS.md` for known evaluation concerns. These commands have not yet been run locally as part of this integration.

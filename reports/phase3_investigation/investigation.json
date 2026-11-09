@@ -1,0 +1,893 @@
+{
+  "files": [
+    "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",
+    "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",
+    "Friday-WorkingHours-Morning.pcap_ISCX.csv",
+    "Monday-WorkingHours.pcap_ISCX.csv",
+    "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",
+    "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+    "Tuesday-WorkingHours.pcap_ISCX.csv",
+    "Wednesday-workingHours.pcap_ISCX.csv"
+  ],
+  "label_encoding": {
+    "n_distinct_raw_byte_labels": 15,
+    "kinds_found": {
+      "ascii": 19,
+      "utf8_replacement_char_in_file": 3
+    },
+    "original_files_contain_utf8_replacement_char": true,
+    "non_ascii_labels": [
+      {
+        "file": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "raw_bytes_hex": "5765622041747461636b20efbfbd20427275746520466f726365",
+        "kind": "utf8_replacement_char_in_file",
+        "rows": 1507,
+        "decodings": {
+          "utf-8(replace)": "Web Attack \ufffd Brute Force",
+          "cp1252(replace)": "Web Attack \u00ef\u00bf\u00bd Brute Force",
+          "latin-1": "Web Attack \u00ef\u00bf\u00bd Brute Force"
+        },
+        "loader_style_decoding": "Web Attack \ufffd Brute Force"
+      },
+      {
+        "file": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "raw_bytes_hex": "5765622041747461636b20efbfbd20585353",
+        "kind": "utf8_replacement_char_in_file",
+        "rows": 652,
+        "decodings": {
+          "utf-8(replace)": "Web Attack \ufffd XSS",
+          "cp1252(replace)": "Web Attack \u00ef\u00bf\u00bd XSS",
+          "latin-1": "Web Attack \u00ef\u00bf\u00bd XSS"
+        },
+        "loader_style_decoding": "Web Attack \ufffd XSS"
+      },
+      {
+        "file": "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",
+        "raw_bytes_hex": "5765622041747461636b20efbfbd2053716c20496e6a656374696f6e",
+        "kind": "utf8_replacement_char_in_file",
+        "rows": 21,
+        "decodings": {
+          "utf-8(replace)": "Web Attack \ufffd Sql Injection",
+          "cp1252(replace)": "Web Attack \u00ef\u00bf\u00bd Sql Injection",
+          "latin-1": "Web Attack \u00ef\u00bf\u00bd Sql Injection"
+        },
+        "loader_style_decoding": "Web Attack \ufffd Sql Injection"
+      }
+    ],
+    "distinct_raw_forms_per_clean_label": {},
+    "class_counts_split_by_inconsistent_encoding": false,
+    "similar_not_merged": [],
+    "clean_label_counts": {
+      "BENIGN": 2273097,
+      "DoS Hulk": 231073,
+      "PortScan": 158930,
+      "DDoS": 128027,
+      "DoS GoldenEye": 10293,
+      "FTP-Patator": 7938,
+      "SSH-Patator": 5897,
+      "DoS slowloris": 5796,
+      "DoS Slowhttptest": 5499,
+      "Bot": 1966,
+      "Web Attack Brute Force": 1507,
+      "Web Attack XSS": 652,
+      "Infiltration": 36,
+      "Web Attack Sql Injection": 21,
+      "Heartbleed": 11
+    },
+    "interpretation_hint": "If kind is 'cp1252_dash_byte', the file stores a single byte 0x96; the replacement character only appears when a reader decodes it wrongly (the loader decodes cp1252). If kind is 'utf8_replacement_char_in_file', the character is baked into the file."
+  },
+  "missing_and_infinite": {
+    "rows": 2830743,
+    "total_nan_cells": 1358,
+    "total_pos_inf_cells": 4376,
+    "total_neg_inf_cells": 0,
+    "nan_by_column": {
+      "Flow Bytes/s": 1358
+    },
+    "pos_inf_by_column": {
+      "Flow Bytes/s": 1509,
+      "Flow Packets/s": 2867
+    },
+    "neg_inf_by_column": {},
+    "unparseable_by_column": {},
+    "inf_cells_with_zero_flow_duration": {
+      "Flow Bytes/s": 1509,
+      "Flow Packets/s": 2867
+    },
+    "by_file": {
+      "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv": {
+        "rows": 225745,
+        "nan_cells": 4,
+        "inf_cells": 64
+      },
+      "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv": {
+        "rows": 286467,
+        "nan_cells": 15,
+        "inf_cells": 727
+      },
+      "Friday-WorkingHours-Morning.pcap_ISCX.csv": {
+        "rows": 191033,
+        "nan_cells": 28,
+        "inf_cells": 216
+      },
+      "Monday-WorkingHours.pcap_ISCX.csv": {
+        "rows": 529918,
+        "nan_cells": 64,
+        "inf_cells": 810
+      },
+      "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv": {
+        "rows": 288602,
+        "nan_cells": 18,
+        "inf_cells": 396
+      },
+      "Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv": {
+        "rows": 170366,
+        "nan_cells": 20,
+        "inf_cells": 250
+      },
+      "Tuesday-WorkingHours.pcap_ISCX.csv": {
+        "rows": 445909,
+        "nan_cells": 201,
+        "inf_cells": 327
+      },
+      "Wednesday-workingHours.pcap_ISCX.csv": {
+        "rows": 692703,
+        "nan_cells": 1008,
+        "inf_cells": 1586
+      }
+    },
+    "by_class": {
+      "BENIGN": {
+        "rows": 2273097,
+        "rows_with_inf": 1777,
+        "rows_with_nan": 409,
+        "pct_rows_with_inf": 0.0782,
+        "pct_rows_with_nan": 0.018
+      },
+      "DoS Hulk": {
+        "rows": 231073,
+        "rows_with_inf": 949,
+        "rows_with_nan": 949,
+        "pct_rows_with_inf": 0.4107,
+        "pct_rows_with_nan": 0.4107
+      },
+      "PortScan": {
+        "rows": 158930,
+        "rows_with_inf": 126,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0793,
+        "pct_rows_with_nan": 0.0
+      },
+      "DDoS": {
+        "rows": 128027,
+        "rows_with_inf": 2,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0016,
+        "pct_rows_with_nan": 0.0
+      },
+      "DoS GoldenEye": {
+        "rows": 10293,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      },
+      "FTP-Patator": {
+        "rows": 7938,
+        "rows_with_inf": 3,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0378,
+        "pct_rows_with_nan": 0.0
+      },
+      "SSH-Patator": {
+        "rows": 5897,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      },
+      "DoS slowloris": {
+        "rows": 5796,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      },
+      "DoS Slowhttptest": {
+        "rows": 5499,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      },
+      "Bot": {
+        "rows": 1966,
+        "rows_with_inf": 10,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.5086,
+        "pct_rows_with_nan": 0.0
+      },
+      "Web Attack Brute Force": {
+        "rows": 1507,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      },
+      "Web Attack XSS": {
+        "rows": 652,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      },
+      "Infiltration": {
+        "rows": 36,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      },
+      "Web Attack Sql Injection": {
+        "rows": 21,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      },
+      "Heartbleed": {
+        "rows": 11,
+        "rows_with_inf": 0,
+        "rows_with_nan": 0,
+        "pct_rows_with_inf": 0.0,
+        "pct_rows_with_nan": 0.0
+      }
+    },
+    "inf_cells_by_class_column": {
+      "BENIGN|Flow Bytes/s": 1368,
+      "BENIGN|Flow Packets/s": 1777,
+      "DDoS|Flow Bytes/s": 2,
+      "DDoS|Flow Packets/s": 2,
+      "PortScan|Flow Bytes/s": 126,
+      "PortScan|Flow Packets/s": 126,
+      "Bot|Flow Bytes/s": 10,
+      "Bot|Flow Packets/s": 10,
+      "FTP-Patator|Flow Bytes/s": 3,
+      "FTP-Patator|Flow Packets/s": 3,
+      "DoS Hulk|Flow Packets/s": 949
+    },
+    "nan_cells_by_class_column": {
+      "BENIGN|Flow Bytes/s": 409,
+      "DoS Hulk|Flow Bytes/s": 949
+    },
+    "examples": [
+      {
+        "csv_line": 67,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 1769,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 1892,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 3377,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 6798,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 8059,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 8407,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 13315,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 13718,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 14741,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 15049,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 18255,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 33332,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 55553,
+        "label": "DDoS",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 61531,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 88093,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 130670,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 148286,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 174381,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 174396,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 250,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 5007,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 11484,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 12826,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 12829,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 14194,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 17312,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 22473,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 30475,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 34906,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 36011,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 38454,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 38495,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 39574,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 39578,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 40709,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 41636,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 44051,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 52458,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 54643,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 606,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 3788,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 4155,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 4468,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 4754,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 9583,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 10834,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Packets/s"
+        ],
+        "nan_columns": [
+          "Flow Bytes/s"
+        ],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 11781,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 12506,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      },
+      {
+        "csv_line": 13096,
+        "label": "BENIGN",
+        "inf_columns": [
+          "Flow Bytes/s",
+          "Flow Packets/s"
+        ],
+        "nan_columns": [],
+        "file": "Friday-WorkingHours-Morning.pcap_ISCX.csv"
+      }
+    ]
+  },
+  "duplicates": {
+    "rows": 2830743,
+    "exact_duplicate_rows_global": 308381,
+    "exact_duplicate_rows_within_file": 256479,
+    "exact_duplicates_only_across_files": 51902,
+    "label_conflict_groups": 698,
+    "label_conflict_rows": 7020,
+    "vectors_spanning_multiple_files": 34208,
+    "rows_in_spanning_vectors": 146363,
+    "spanning_vectors_with_label_disagreement": 664,
+    "per_class": {
+      "BENIGN": {
+        "rows": 2273097,
+        "exact_duplicate_rows": 176613,
+        "rows_in_label_conflicts": 736,
+        "rows_in_cross_file_vectors": 140499,
+        "pct_removed_by_drop_exact": 7.77
+      },
+      "Bot": {
+        "rows": 1966,
+        "exact_duplicate_rows": 13,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 0.661
+      },
+      "DDoS": {
+        "rows": 128027,
+        "exact_duplicate_rows": 11,
+        "rows_in_label_conflicts": 6,
+        "rows_in_cross_file_vectors": 6,
+        "pct_removed_by_drop_exact": 0.009
+      },
+      "DoS GoldenEye": {
+        "rows": 10293,
+        "exact_duplicate_rows": 7,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 0.068
+      },
+      "DoS Hulk": {
+        "rows": 231073,
+        "exact_duplicate_rows": 58224,
+        "rows_in_label_conflicts": 5224,
+        "rows_in_cross_file_vectors": 4804,
+        "pct_removed_by_drop_exact": 25.197
+      },
+      "DoS Slowhttptest": {
+        "rows": 5499,
+        "exact_duplicate_rows": 271,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 4.928
+      },
+      "DoS slowloris": {
+        "rows": 5796,
+        "exact_duplicate_rows": 411,
+        "rows_in_label_conflicts": 1,
+        "rows_in_cross_file_vectors": 1,
+        "pct_removed_by_drop_exact": 7.091
+      },
+      "FTP-Patator": {
+        "rows": 7938,
+        "exact_duplicate_rows": 2005,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 25.258
+      },
+      "Heartbleed": {
+        "rows": 11,
+        "exact_duplicate_rows": 0,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 0.0
+      },
+      "Infiltration": {
+        "rows": 36,
+        "exact_duplicate_rows": 0,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 0.0
+      },
+      "PortScan": {
+        "rows": 158930,
+        "exact_duplicate_rows": 68111,
+        "rows_in_label_conflicts": 1053,
+        "rows_in_cross_file_vectors": 1053,
+        "pct_removed_by_drop_exact": 42.856
+      },
+      "SSH-Patator": {
+        "rows": 5897,
+        "exact_duplicate_rows": 2678,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 45.413
+      },
+      "Web Attack Brute Force": {
+        "rows": 1507,
+        "exact_duplicate_rows": 37,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 2.455
+      },
+      "Web Attack Sql Injection": {
+        "rows": 21,
+        "exact_duplicate_rows": 0,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 0.0
+      },
+      "Web Attack XSS": {
+        "rows": 652,
+        "exact_duplicate_rows": 0,
+        "rows_in_label_conflicts": 0,
+        "rows_in_cross_file_vectors": 0,
+        "pct_removed_by_drop_exact": 0.0
+      }
+    }
+  }
+}

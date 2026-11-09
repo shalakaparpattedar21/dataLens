@@ -13,6 +13,7 @@ venv/
 # Data: never commit raw or processed CIC-IDS2017 files (large; redistribution terms apply)
 data/raw/*
 data/processed/*
+data/workspace/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
@@ -25,3 +26,16 @@ models_store/
 .DS_Store
 .vscode/
 .idea/
+web/node_modules/
+web/dist/
+
+# Additional development exclusions
+venv/
+.pytest_cache/
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3
+*.db
+__pycache__/
+reports/tables_backup_before_phase3/

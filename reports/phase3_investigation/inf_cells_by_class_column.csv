@@ -1,0 +1,12 @@
+class,column,inf_cells
+BENIGN,Flow Bytes/s,1368
+BENIGN,Flow Packets/s,1777
+DDoS,Flow Bytes/s,2
+DDoS,Flow Packets/s,2
+PortScan,Flow Bytes/s,126
+PortScan,Flow Packets/s,126
+Bot,Flow Bytes/s,10
+Bot,Flow Packets/s,10
+FTP-Patator,Flow Bytes/s,3
+FTP-Patator,Flow Packets/s,3
+DoS Hulk,Flow Packets/s,949

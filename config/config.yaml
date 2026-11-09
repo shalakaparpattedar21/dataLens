@@ -44,9 +44,68 @@ quality:
   duplicate_pct_warn: 1.0         # percent of rows
 
 split:
-  strategy: stratified            # stratified | by_day (added in a later phase)
+  # Retained for compatibility with the Phase 1/2 configuration.
+  strategy: stratified
   test_size: 0.2
   cv_folds: 5
+  random:                         # Stratified random split (same-capture evaluation)
+    rare_class_policy: train_only
+    min_class_count: 2
+    min_test_per_class: 5
+  day_aware:                      # Hold out complete capture days
+    groups:
+      monday: [monday]
+      tuesday: [tuesday]
+      wednesday: [wednesday]
+      thursday: [thursday]
+      friday: [friday]
+    primary_holdout: [friday]
+
+preprocessing:
+  numeric:
+    inf_strategy: nan             # nan | clip. inf is "undefined", never silently 0
+    imputer: median               # median | mean | most_frequent (fitted on training rows only)
+    missing_indicator: true       # keep the fact that a value was inf/NaN as extra 0/1 columns
+    scaler: robust                # standard | robust | minmax | none. Trees do not need scaling
+  categorical:
+    imputer: most_frequent
+    handle_unknown: ignore
+    min_frequency: null
+  duplicates:
+    # keep | drop_exact | drop_conflicts | drop_exact_and_conflicts
+    # drop_exact is the default: exact duplicates split across train/test inflate test scores.
+    # Conflicting vectors are KEPT by default: they are real irreducible label noise.
+    policy: drop_exact
+    max_class_loss_pct: 50.0      # warn when a class loses at least this share of its rows
+  fit_max_rows: 500000            # preprocessor statistics fitted on <= this many TRAIN rows (null = all)
+  transform_chunk_size: 200000
+
+features:
+  exclude_zero_variance: true     # drops ONLY features constant on the training rows (logged with evidence)
+  variance_threshold: 1.0e-8
+  correlation_threshold: 0.95
+  correlation_method: pearson
+  analysis_max_rows: 200000       # training rows sampled for correlation analysis
+  probe:                          # single-feature shortcut probe (flags for review, never removes)
+    enabled: true
+    max_rows: 100000
+    cv: 3
+    max_depth: 3
+    flag_auc: 0.99
+  importance:                     # train-only impurity importance (preparation for Phase 5)
+    enabled: true
+    n_estimators: 100
+    max_depth: 12
+    max_rows: 200000
+  selection:
+    method: none                  # none | variance | kbest_f | kbest_mi | model_rf (compared in Phase 4/5 with CV)
+    k: 30
+
+imbalance:
+  minority_pct: 1.0
+  min_test_per_class: 5
+  low_support_test: 30
+  smote_k: 5
 
 logging:
   level: INFO
