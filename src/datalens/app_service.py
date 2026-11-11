@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import codecs
+import contextlib
 import json
 import os
 import re
@@ -264,8 +265,10 @@ def profile_files(
     schema = None
     sample_parts: list[pd.DataFrame] = []
     file_stats = []
-    with tempfile.TemporaryDirectory(prefix="datalens-profile-") as tmp:
-        conn = sqlite3.connect(Path(tmp) / "duplicates.sqlite")
+    # The connection must be closed BEFORE the temp directory is removed, also when the scan fails part-way:
+    # Windows refuses to delete an open SQLite file, which used to replace the real error with a PermissionError.
+    with tempfile.TemporaryDirectory(prefix="datalens-profile-") as tmp, contextlib.ExitStack() as stack:
+        conn = stack.enter_context(contextlib.closing(sqlite3.connect(Path(tmp) / "duplicates.sqlite")))
         conn.execute("CREATE TABLE exact_counts(h TEXT,label TEXT,n INTEGER,PRIMARY KEY(h,label))")
         conn.execute("CREATE TABLE within_counts(h TEXT,label TEXT,source TEXT,n INTEGER,PRIMARY KEY(h,label,source))")
         total_chunks = max(1, sum(max(1, p.stat().st_size // (3 * 1024 * 1024)) for p in files))

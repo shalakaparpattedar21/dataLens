@@ -5,6 +5,7 @@ pyarrow>=15.0          # parquet cache for processed data (avoids re-parsing lar
 
 # Machine learning
 scikit-learn>=1.5
+scipy>=1.11
 joblib>=1.4
 
 # Visualization / analysis

@@ -321,6 +321,7 @@ def _prepare_into(
         "missing_indicator": prep_cfg["numeric"]["missing_indicator"], "encoding": prep_cfg["categorical"]["encoding"],
         "scaler": prep_cfg["numeric"]["scaler"], "feature_selection": selection,
         "selection_k": options.get("selection_k", 30), "fit_record": fit_record,
+        "fit_scope": "train split only (imputer, scaler, encoder and selector)", "fit_rows": int(len(fit_frame)),
         "split_method": "seeded per-class random assignment within chunks (approximately stratified)",
         "class_counts": {split: dict(counts) for split, counts in class_counts.items()},
         "class_coverage": coverage, "train_test_overlap": overlap,

@@ -444,3 +444,33 @@ def test_import_cicids_is_idempotent_and_missing_folder_is_404(env, monkeypatch,
     assert len(client.get("/api/datasets").json()["datasets"]) == 1
     make_df(50).to_csv(raw / "tuesday.csv", index=False)                       # a different file set registers separately
     assert client.post("/api/datasets/import-cicids").status_code == 201
+
+
+def test_failed_profile_closes_sqlite_before_temp_dir_cleanup(env, monkeypatch):
+    """Windows cannot delete an open SQLite file; a failed scan must still close its connection first
+    so the user sees the real error instead of a PermissionError from temp-dir cleanup."""
+    import sqlite3
+
+    client, _, _ = env
+    opened = []
+
+    class Tracked(sqlite3.Connection):
+        closed = False
+
+        def close(self):
+            self.closed = True
+            super().close()
+
+    real_connect = sqlite3.connect
+
+    def tracking_connect(*args, **kwargs):
+        conn = real_connect(*args, factory=Tracked, **kwargs)
+        opened.append(conn)
+        return conn
+
+    monkeypatch.setattr(sqlite3, "connect", tracking_connect)
+    ds = upload(client, make_df())
+    job = wait_job(client, client.post(f"/api/datasets/{ds['id']}/profile", json={"label_column": "nope"}).json()["job"]["id"])
+    assert job["status"] == "failed" and "nope" in job["error"]
+    assert opened, "profile did not open its duplicate-tracking database"
+    assert all(c.closed for c in opened)
