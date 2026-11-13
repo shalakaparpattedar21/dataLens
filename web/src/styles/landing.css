@@ -1,0 +1,24 @@
+/* Landing page. Prefixed lp-; shares Playfair 400 / Inter and the indigo-violet-teal-amber palette with the workspace. */
+.lp-root { background:#070c1a; color:#e6ecf7; font-family:Inter, ui-sans-serif, system-ui, sans-serif; min-height:100vh; overflow-x:clip; }
+.lp-root h1, .lp-root h2, .lp-root h3 { font-family:"Playfair Display", Georgia, serif; font-weight:400 !important; letter-spacing:-.015em; color:#fff; }
+.lp-h1 { font-size:clamp(42px, 5.4vw, 78px); line-height:1.02; }
+.lp-h2 { font-size:clamp(34px, 4.4vw, 58px); line-height:1.08; }
+.lp-eyebrow { font-size:12.5px; font-weight:700; letter-spacing:.2em; color:#a5b4fc; }
+.lp-cta, .lp-cta-2 { display:inline-flex; align-items:center; justify-content:center; border-radius:999px; padding:14px 26px; font-size:16px; font-weight:600; transition:.18s; }
+.lp-cta { background:#6366f1; color:#fff; box-shadow:0 10px 30px -10px #6366f1; } .lp-cta:hover { background:#7c7ff7; transform:translateY(-1px); }
+.lp-cta-2 { border:1px solid #3a4a6b; color:#cbd5e8; background:transparent; } .lp-cta-2:hover { border-color:#8fa3c4; color:#fff; }
+.lp-chip { display:inline-flex; align-items:center; gap:6px; border-radius:999px; border:1px solid #2a3a5f; background:#0f1830; color:#b9c6e2; padding:6px 13px; font-size:13.5px; font-weight:600; transition:.15s; }
+.lp-chip:hover { border-color:#6b7fb0; color:#fff; } .lp-chip-on { background:#4f46e5; border-color:#6366f1; color:#fff; }
+.lp-link { color:#a5b4fc; font-weight:600; font-size:15px; } .lp-link:hover { color:#fff; text-decoration:underline; }
+.lp-doc { position:relative; border:1px solid #2a3a5f; background:#101a33; padding:14px 14px 14px 16px; clip-path:polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%); transition:.15s; }
+.lp-doc:hover, .lp-doc-on { border-color:#6366f1; background:#17224a; }
+.lp-node { cursor:pointer; outline:none; } .lp-node:focus-visible rect:first-of-type { stroke:#fff; }
+.lp-flow { stroke-dasharray:2 14; animation:lp-dash 1.1s linear infinite; }
+@keyframes lp-dash { to { stroke-dashoffset:-32; } }
+.lp-fade { animation:lp-fade .35s ease both; } @keyframes lp-fade { from { opacity:0; transform:scale(.995); } to { opacity:1; transform:none; } }
+.lp-reveal { opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; } .lp-reveal-in { opacity:1; transform:none; }
+.lp-section { padding:clamp(64px, 9vw, 130px) 0; }
+.lp-rule { height:1px; background:linear-gradient(90deg, transparent, #2a3a5f 20%, #2a3a5f 80%, transparent); }
+.lp-hero-glow { background:radial-gradient(60% 50% at 75% 45%, rgba(79,70,229,.22), transparent 70%), radial-gradient(40% 40% at 90% 80%, rgba(20,184,166,.10), transparent 70%); }
+.lp-nav a, .lp-nav button.lp-navlink { color:#b9c6e2; font-size:14.5px; font-weight:500; } .lp-nav a:hover, .lp-nav button.lp-navlink:hover { color:#fff; }
+@media (prefers-reduced-motion: reduce) { .lp-flow, .lp-fade { animation:none !important; } .lp-reveal { opacity:1; transform:none; transition:none; } .lp-cta:hover { transform:none; } }

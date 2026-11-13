@@ -1,0 +1,16 @@
+/* DataLens design tokens. Components reference these variables; nothing hard-codes a brand colour. */
+:root {
+  --primary:#4f46e5; --primary-hover:#4338ca; --primary-soft:#eef2ff; --secondary:#64748b;
+  --success:#067647; --success-soft:#ecfdf3; --warning:#b45309; --warning-soft:#fffaeb;
+  --error:#b42318; --error-soft:#fef3f2; --info:#2563eb; --info-soft:#eff6ff;
+  --selected:#e0e7ff; --hover:#f1f5f9; --disabled:#cbd5e1;
+  --ink:#142338; --muted:#66758a; --line:#e3e8f0; --bg:#f5f7fb; --surface:#ffffff;
+  /* domain colours used by the process map and charts */
+  --c-ingest:#3b82f6; --c-analysis:#14b8a6; --c-decision:#f59e0b; --c-critical:#ef4444; --c-done:#22c55e; --c-action:#818cf8;
+  --chart-1:#4f46e5; --chart-2:#0d9488; --chart-3:#d97706; --chart-4:#2563eb; --chart-5:#be185d; --chart-6:#65a30d;
+  /* dark process-map canvas */
+  --canvas:#0b1220; --canvas-grid:#1b2740; --canvas-lane:#0f1a2e; --canvas-node:#13203a; --canvas-text:#e6ecf7; --canvas-muted:#8fa3c4;
+  /* type scale */
+  --fs-page:34px; --fs-section:26px; --fs-sub:20px; --fs-body:15.5px; --fs-nav:14.5px; --fs-table:13.5px; --fs-secondary:12.5px;
+  --sidebar-w:272px;
+}
