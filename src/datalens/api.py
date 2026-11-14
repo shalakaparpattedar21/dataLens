@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import os
 import json
 import logging
 import threading
@@ -21,9 +21,21 @@ from datalens.prepare_service import prepare_streaming
 logger = logging.getLogger("datalens.api")
 
 app = FastAPI(title="DataLens API", version="0.4.0", description="Local dataset profiling and preparation service")
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "DATALENS_CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173"
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
-    CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_credentials=False, allow_methods=["GET", "POST", "DELETE"], allow_headers=["*"]
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
 )
 store = DatasetStore()
 executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="datalens-job")
