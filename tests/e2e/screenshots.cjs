@@ -1,0 +1,21 @@
+// Regenerates the real-application screenshots used by the landing page showcase.
+// Usage: NODE_PATH=$(npm root -g) node tests/e2e/screenshots.cjs <csv> <out-dir>   (backend :8000 and frontend :5173 running, fresh workspace)
+const { chromium } = require('playwright')
+const [csv, out] = process.argv.slice(2)
+;(async () => {
+  const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } })
+  const nav = (n) => p.locator('aside .nav-item', { hasText: n }).first().click()
+  const shot = async (name, sel) => { await p.waitForTimeout(500); for (const b of await p.locator('button[aria-label=Dismiss]').all()) await b.click().catch(() => {}); await p.evaluate(() => window.scrollTo(0, 0)); if (sel) { await p.locator(sel).first().scrollIntoViewIfNeeded(); await p.evaluate(() => window.scrollBy(0, 330)); await p.waitForTimeout(300) } await p.screenshot({ path: `${out}/${name}.jpg`, type: 'jpeg', quality: 82 }) }
+  await p.goto('http://localhost:5173/#/app'); await p.setInputFiles('input[type=file]', csv); await p.getByText('Profile complete.').first().waitFor({ timeout: 120000 })
+  await nav('Investigate'); await p.getByRole('button', { name: 'Run analysis' }).first().click(); await p.getByText('Analysis complete.').first().waitFor({ timeout: 120000 })
+  await p.getByRole('button', { name: 'Dismiss' }).first().click().catch(() => {})
+  await nav('Prepare data'); await p.getByLabel('Dataset size').selectOption('1'); await p.getByRole('button', { name: /Prepare and validate/ }).click(); await p.getByText('Preparation complete and validated.').first().waitFor({ timeout: 120000 })
+  await p.waitForTimeout(1500)
+  await nav('Process Map'); await shot('process-map')
+  await nav('Feature Intelligence'); await p.getByRole('img', { name: 'Correlation heatmap' }).waitFor(); await shot('feature-intelligence')
+  await nav('Anomaly Analysis'); await p.waitForTimeout(800); await shot('anomaly-analysis', 'h2:has-text("Projection")')
+  await nav('Leakage Intelligence'); await shot('leakage-intelligence')
+  await nav('Prepare data'); await shot('prepare-data')
+  await nav('Dataset Health'); await shot('dataset-health')
+  await b.close()
+})().catch((e) => { console.error(e); process.exit(1) })
