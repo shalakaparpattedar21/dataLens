@@ -9,12 +9,12 @@ __pycache__/
 .venv/
 venv/
 .env
-
-# Data: never commit raw or processed CIC-IDS2017 files (large; redistribution terms apply)
+# Data: exclude original raw and processed CIC-IDS2017 files
 data/raw/*
 data/processed/*
 data/workspace/
 !data/raw/.gitkeep
+!data/raw/DataLens_Synthetic_Network_Traffic_Demo_5000.csv
 !data/processed/.gitkeep
 
 # Trained models (large binaries); experiment logs and reports ARE tracked
