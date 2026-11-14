@@ -6,7 +6,7 @@ export default function Radar({ axes, size = 320, title = 'Radar chart' }) {
   const pt = (i, v) => { const a = -Math.PI / 2 + (2 * Math.PI * i) / n; return [c + (R * v / 100) * Math.cos(a), c + (R * v / 100) * Math.sin(a)] }
   const poly = axes.map((a, i) => pt(i, Math.max(0, Math.min(100, a.value))).join(',')).join(' ')
   const desc = axes.map((a) => `${a.label} ${Math.round(a.value)}`).join(', ')
-  return <svg viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`${title}: ${desc}`} className="mx-auto block h-auto w-full max-w-[360px]">
+  return <svg viewBox={`-90 0 ${size + 180} ${size}`} role="img" aria-label={`${title}: ${desc}`} className="mx-auto block h-auto w-full max-w-[520px]">
     {[25, 50, 75, 100].map((r) => <polygon key={r} points={axes.map((_, i) => pt(i, r).join(',')).join(' ')} fill="none" stroke="var(--line)" />)}
     {axes.map((_, i) => <line key={i} x1={c} y1={c} x2={pt(i, 100)[0]} y2={pt(i, 100)[1]} stroke="var(--line)" />)}
     <polygon points={poly} fill="var(--chart-1)" fillOpacity=".18" stroke="var(--chart-1)" strokeWidth="2" />
