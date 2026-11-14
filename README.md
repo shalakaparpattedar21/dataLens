@@ -1,7 +1,5 @@
 # DataLens
 
-**From raw data to reliable machine learning.**
-
 DataLens is a local tool that looks at a tabular dataset *before* you train anything on it. You give it a CSV, it tells you what is wrong with the data (missing values, duplicates, outliers, leakage between train and test), shows you the evidence, and then prepares a clean train/test split you can export.
 
 I built it around network intrusion detection, using the **CIC-IDS2017** dataset (2.8 million flows) as the main test case, but it works on any CSV. Everything runs on your own machine. Your files are never modified and nothing is uploaded anywhere.
