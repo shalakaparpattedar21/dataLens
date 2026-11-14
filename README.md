@@ -333,11 +333,3 @@ It covers the landing page, upload, all workspace pages, filters, downloads, res
 CIC-IDS2017 is not included in this repository. See [`data/README.md`](data/README.md) for download steps and terms. If you use it, cite:
 
 > I. Sharafaldin, A. H. Lashkari, A. A. Ghorbani, "Toward Generating a New Intrusion Detection Dataset and Intrusion Traffic Characterization", ICISSP 2018.
-
-## More documentation
-
-- [`docs/FEATURES.md`](docs/FEATURES.md): methods and limits of each feature
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): design and extension points
-- [`CHANGELOG.md`](CHANGELOG.md): what changed in each version
-- [`PROGRESS.md`](PROGRESS.md): phase-by-phase status
-
