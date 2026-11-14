@@ -8,9 +8,6 @@ I built it around network intrusion detection, using the **CIC-IDS2017** dataset
 
 ![DataLens landing page](docs/screenshots/landing-page.png)
 
-## Why I built this
-
-Intrusion-detection benchmarks often report very high scores. A lot of that can come from the data rather than the model: duplicate rows that land in both train and test, near-identical flows, columns that give the label away, and a random split that ignores time. I wanted a tool that makes these problems visible first, so the model results that come later can be trusted (or at least questioned properly).
 
 ## Contents
 
@@ -165,7 +162,7 @@ Every run keeps its own folder of files that can be downloaded from the app (see
 
 ![Train/test overlap](docs/screenshots/08-leakage-overlap.png)
 
-After preparation DataLens compares the splits. **3,464 of 56,705 test rows (6.11%) are exact copies of training rows**, matched by a 64-bit hash over all columns. The histogram shows the distance from each test row to its nearest training row: most are extremely close. With a 0.05 RMS threshold, 1,649 of 2,000 checked test rows (82%) have a near-identical training row. This is only reported as *potential*, because many flows in this dataset are tiny and nearly identical by nature. It still tells me that a plain random split on CIC-IDS2017 will give optimistic scores.
+After preparation DataLens compares the splits. **3,464 of 56,705 test rows (6.11%) are exact copies of training rows**, matched by a 64-bit hash over all columns. The histogram shows the distance from each test row to its nearest training row: most are extremely close. 
 
 ![Leakage findings](docs/screenshots/09-leakage-findings.png)
 
@@ -332,11 +329,6 @@ It covers the landing page, upload, all workspace pages, filters, downloads, res
 - The full 2.8M-row dataset has been profiled through the UI. Timing and memory were measured on 1M-row synthetic data in a Linux container, not on CIC-IDS2017.
 - The "real" screenshots on the landing page use a small synthetic demo dataset. Figures in the landing page's illustrative panels are labelled as illustrative and are not results.
 
-## Not built yet
-
-Model training and evaluation (the `models/` package is still empty), hyperparameter tuning, experiment tracking, drift analysis, other file formats than CSV, and group/time-aware splitting. `docs/ARCHITECTURE.md` lists where each would plug in.
-
-The original research questions (effect of preprocessing on classifiers, imbalance handling, tuning, feature importance, compute cost) belong to that later model phase, which has not started.
 
 ## Dataset and citation
 
@@ -351,4 +343,3 @@ CIC-IDS2017 is not included in this repository. See [`data/README.md`](data/READ
 - [`CHANGELOG.md`](CHANGELOG.md): what changed in each version
 - [`PROGRESS.md`](PROGRESS.md): phase-by-phase status
 
-Built by [@shalakaparpattedar21](https://github.com/shalakaparpattedar21).
